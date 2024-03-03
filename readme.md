@@ -2,7 +2,7 @@
 
 ## Overview
 
-mipaas is a Flask web application that streamlines the process of mapping fields from customer-uploaded CSV files to various user-provided data formats. It provides a user-friendly interface to facilitate non-technical users in uploading and transforming data according to their requirements.
+mipaas (Micro Integration Platform as a Service) is a lightweight Flask application designed to simplify data integration workflows. This tool enables users to effortlessly map fields from customer-uploaded CSV files to specified data formats, streamlining the data preparation process for various analytics or database loading tasks. With its intuitive interface, mipaas is accessible to both technical and non-technical users, allowing for easy data uploading and transformation to meet diverse requirements. Whether you're consolidating data for analysis, preparing datasets for database ingestion, or integrating information across systems, mipaas serves as an easy tool for efficient and accurate data handling.
 
 ![User Interface](https://i.imgur.com/J6dLtaO.png)
 
