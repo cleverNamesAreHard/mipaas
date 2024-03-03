@@ -81,11 +81,11 @@ For internal use, the application has been confirmed to work in Firefox.
 
 ### Using the CLI
 To use the CLI for automated file transformation, ensure the Flask server is running and then use the `mipaas.py` script as follows:
-    ```bash
-    python mipaas.py <input_file_location> <file_mapping_location> <output_file_location>
-    ```
+```bash
+python mipaas.py <input_file_location> <file_mapping_location> <output_file_location>
+```
 
-    To create the mapping file, you must use the web interface to specify the field mapping, and select "Export".
+To create the mapping file, you must use the web interface to specify the field mapping, and select "Export".
 
 ### Adding Data Formats
 
