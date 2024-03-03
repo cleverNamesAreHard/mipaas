@@ -54,7 +54,7 @@ mipaas (Micro Integration Platform as a Service) is a lightweight Flask applicat
 
 4. Generate a secret key for Flask:
 	```bash
-	python -c 'import os; print(os.urandom(16))' 
+	python -c "import os; print(os.urandom(8).hex())" 
 	```
 
 5. Set up the Flask secret key by adding the following line to your venv/bin/activate script:
