@@ -189,6 +189,8 @@
         var safeHeader = header.replace(/[\s\.]/g, '_');
         var row = '<tr><td>' + header + '</td><td>';
         row += '<select class="form-control" name="mapping_' + safeHeader + '">';
+        // Add an option for "No mapping"
+        row += '<option value="No mapping">No mapping</option>';
         fileFormats[selectedFormat].forEach(function(field) {
           row += '<option value="' + field + '">' + field + '</option>';
         });
@@ -196,12 +198,12 @@
         $('#mappingTableBody').append(row);
       });
     }
-    
+
     $(document).on('change', '.custom-file-input', function() {
       var fileName = $(this).val().split('\\').pop();
       $(this).next('.custom-file-label').addClass("selected").html(fileName);
     });
-    
+
     $(document).ready(function() {
       if ($('#formatSelect').length) {
         updateMappingTable();
