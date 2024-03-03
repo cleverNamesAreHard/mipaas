@@ -4,7 +4,7 @@
 
 mipaas is a Flask web application that streamlines the process of mapping fields from customer-uploaded CSV files to various user-provided data formats. It provides a user-friendly interface to facilitate non-technical users in uploading and transforming data according to their requirements.
 
-![User Interface](https://i.imgur.com/itYdXdr.png)
+![User Interface](https://i.imgur.com/J6dLtaO.png)
 
 ## Features
 
@@ -76,6 +76,18 @@ mipaas is a Flask web application that streamlines the process of mapping fields
 2. Open your web browser and navigate to http://127.0.0.1:5000 to start using the application.
 
 For internal use, the application has been confirmed to work in Firefox.
+
+### Adding Data Formats
+
+1. In `file_formats.json`, add a comma at the end of the line containing `"Account File"`
+
+2. In quotes, add a name for the new format, and add the list:
+    ```json
+    "Account File": ["data", "fields", "here"],
+    "My New File Format": []
+    ```
+
+3. Add the fields you require 
 
 ### Usage
 

@@ -59,17 +59,23 @@ def submit_mapping():
         uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'], uploaded_filename)
         df = pd.read_csv(uploaded_file_path)
         
+        # Initialize a dictionary to hold the mapping
         mapping = {}
         for header in session['uploaded_file_headers']:
             form_key = 'mapping_' + header.replace(" ", "_").replace(".", "_")
-            mapping[header] = request.form[form_key]
-
+            mapped_field = request.form[form_key]
+            # Check if the field is mapped or should retain its original name
+            mapping[header] = mapped_field if mapped_field != 'No mapping' else header
+        
+        # Apply the mapping to rename columns
         df.rename(columns=mapping, inplace=True)
 
+        # Save the modified DataFrame to a new file
         modified_filename = "modified_" + uploaded_filename
         modified_filepath = os.path.join(app.config['UPLOAD_FOLDER'], modified_filename)
         df.to_csv(modified_filepath, index=False)
 
+        # Clear the session and return the modified file to the user
         session.clear()
         return send_from_directory(directory=app.config['UPLOAD_FOLDER'], path=modified_filename, as_attachment=True)
 
