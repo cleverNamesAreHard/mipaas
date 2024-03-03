@@ -20,6 +20,8 @@ mipaas (Micro Integration Platform as a Service) is a lightweight Flask applicat
 
 6. **Error Handling**: Robust error handling mechanisms are in place to guard against data processing errors and enhance the user experience.
 
+7. **Command-Line Interface (CLI):** For users seeking to automate data transformation tasks, mipaas now includes a CLI tool. This feature allows for the processing of files through the command line, making it a powerful addition for batch processing or integration into automated workflows. Note: The Flask server must be running for the CLI to function.
+
 ## Getting Started
 
 ### Prerequisites
@@ -76,6 +78,14 @@ mipaas (Micro Integration Platform as a Service) is a lightweight Flask applicat
 2. Open your web browser and navigate to http://127.0.0.1:5000 to start using the application.
 
 For internal use, the application has been confirmed to work in Firefox.
+
+### Using the CLI
+To use the CLI for automated file transformation, ensure the Flask server is running and then use the `mipaas.py` script as follows:
+    ```bash
+    python mipaas.py <input_file_location> <file_mapping_location> <output_file_location>
+    ```
+
+    To create the mapping file, you must use the web interface to specify the field mapping, and select "Export".
 
 ### Adding Data Formats
 
