@@ -2,7 +2,7 @@
 
 ## Overview
 
-mipaas is a Flask web application that streamlines the process of mapping fields from customer-uploaded CSV files to various internal data formats. It provides a user-friendly interface to facilitate non-technical users in uploading and transforming data according to the company's requirements.
+mipaas is a Flask web application that streamlines the process of mapping fields from customer-uploaded CSV files to various user-provided data formats. It provides a user-friendly interface to facilitate non-technical users in uploading and transforming data according to their requirements.
 
 ## Features
 
