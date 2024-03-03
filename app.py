@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, render_template, request, flash, redirect, session, send_from_directory, url_for
+from flask import Flask, render_template, request, flash, redirect, session, send_from_directory, url_for, jsonify
 import pandas as pd
 import os
 from werkzeug.utils import secure_filename
@@ -92,6 +92,30 @@ def restart():
     session.clear()
     flash('The process has been restarted.')
     return redirect(url_for('upload_and_map'))
+
+@app.route('/process-file-mapping', methods=['POST'])
+def process_file_mapping():
+    data = request.get_json()
+    if not data or 'input_file' not in data or 'mapping_file' not in data or 'output_file' not in data:
+        return jsonify({'error': 'Missing data for processing'}), 400
+
+    input_file = data['input_file']
+    mapping_file = data['mapping_file']
+    output_file = data['output_file']
+
+    try:
+        # Load the CSV file
+        df = pd.read_csv(input_file)
+        # Load the mapping JSON
+        with open(mapping_file, 'r') as f:
+            mapping = json.load(f)
+        # Apply the mapping
+        df.rename(columns=mapping, inplace=True)
+        # Save the transformed DataFrame
+        df.to_csv(output_file, index=False)
+        return jsonify({'message': 'File processed successfully', 'output_file': output_file}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
