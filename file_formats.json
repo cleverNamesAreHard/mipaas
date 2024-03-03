@@ -1,0 +1,4 @@
+{
+    "Account File": ["account_number", "customer_code", "class_code", "status", "service_address_line_1", "service_address_line_2", "service_address_city", "service_address_state", "service_address_zipcode", "service_occupant_name", "service_occupant_email", "mailing_address_line_1", "mailing_address_line_2", "mailing_address_city", "mailing_address_state", "mailing_address_zipcode", "mailing_name", "mailing_email"]
+}
+  

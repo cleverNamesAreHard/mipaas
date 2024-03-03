@@ -1,0 +1,2 @@
+account,customer_id,customer_type,status,serviceaddress1,serviceaddress2,servicecity,servicestate,servicezip,servicename,serviceemail,mailingaddress1,mailingaddress2,mailingcity,mailingstate,mailingzip,mailingname,mailingemail
+12345,67890,residential,A,420 Get Baked St,69,Los Angeles,NY,90210,A Pretty Cool Guy,cool_email@awesome_company.com,1 School St,,No City,MO,06451,Kapow Dude,fakeemail@fakewebsite.io

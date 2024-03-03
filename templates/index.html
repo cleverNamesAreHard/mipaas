@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <title>CSV Upload and Field Mapping</title>
+  <style>
+    html {
+      height: 100%;
+      margin: 0;
+      background-color: #343a40;
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      color: #fff;
+      padding: 20px 0;
+      box-sizing: border-box;
+      background-color: #343a40;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 960px;
+      margin: 2% auto;
+      background-color: #fff;
+      color: #343a40;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      margin-top: 2%;
+      margin-bottom: 2%;
+    }
+
+    .alert {
+      margin-top: 20px;
+    }
+
+    .custom-file {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .custom-file-input {
+      text-align: center;
+    }
+
+    .custom-file-label {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .custom-file-label::after {
+      content: "Browse";
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #007bff;
+      color: #fff;
+      border-radius: 0 0.25rem 0.25rem 0;
+      padding: 0.375rem 0.75rem;
+    }
+
+    .upload-btn-wrapper {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .btn-primary {
+      margin: 0 auto;
+      display: block;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+
+    .table {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-warning" role="alert">
+          {% for message in messages %}
+            {{ message }}<br>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% if not file_uploaded %}
+      <div id="upload-section" class="text-center">
+        <form action="" method="post" enctype="multipart/form-data" class="mb-3">
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="file" name="file" aria-describedby="fileInput">
+            <label class="custom-file-label" for="file">Choose file</label>
+          </div>
+          <div class="upload-btn-wrapper">
+            <button type="submit" class="btn btn-primary">Upload</button>
+          </div>
+        </form>
+      </div>
+    {% else %}
+      <div id="file-preview-section" class="mt-4">
+        <h3>File Preview (Top 5 Rows)</h3>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                {% for header in uploaded_file_headers %}
+                  <th>{{ header }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in first_five_rows %}
+                <tr>
+                  {% for header in uploaded_file_headers %}
+                    <td>{{ row.get(header, '') }}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="mapping-section" class="mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">Field Mapping</h2>
+          <div>
+            <form action="{{ url_for('restart') }}" method="post" style="display: inline-block;">
+              <button type="submit" class="btn btn-danger">Restart</button>
+            </form>
+            <button type="button" class="btn btn-info" onclick="document.getElementById('importFileInput').click();">Import</button>
+            <input type="file" id="importFileInput" style="display: none;" onchange="importMapping(event)">
+            <button type="button" class="btn btn-success" onclick="exportMapping()">Export</button>
+          </div>
+        </div>
+        <form id="mappingForm" action="{{ url_for('submit_mapping') }}" method="post">
+          <div class="mb-4">
+            <label for="formatSelect" class="mr-2">Select Format</label>
+            <select class="form-control" id="formatSelect" name="format">
+              {% for format_name, fields in file_formats.items() %}
+                <option value="{{ format_name }}">{{ format_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>CSV Field</th>
+                  <th>Map To</th>
+                </tr>
+              </thead>
+              <tbody id="mappingTableBody">
+                <!-- Table rows will be filled by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Mapping</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+  <script>
+    function updateMappingTable() {
+      var selectedFormat = $('#formatSelect').val();
+      var fileHeaders = {{ uploaded_file_headers|tojson }};
+      var fileFormats = {{ file_formats|tojson }};
+      
+      $('#mappingTableBody').empty();
+      
+      fileHeaders.forEach(function(header) {
+        var safeHeader = header.replace(/[\s\.]/g, '_');
+        var row = '<tr><td>' + header + '</td><td>';
+        row += '<select class="form-control" name="mapping_' + safeHeader + '">';
+        fileFormats[selectedFormat].forEach(function(field) {
+          row += '<option value="' + field + '">' + field + '</option>';
+        });
+        row += '</select></td></tr>';
+        $('#mappingTableBody').append(row);
+      });
+    }
+    
+    $(document).on('change', '.custom-file-input', function() {
+      var fileName = $(this).val().split('\\').pop();
+      $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+    
+    $(document).ready(function() {
+      if ($('#formatSelect').length) {
+        updateMappingTable();
+      }
+    });
+
+    function exportMapping() {
+      var mapping = {};
+      $("#mappingTableBody tr").each(function() {
+        var key = $(this).find("td:first").text();
+        var value = $(this).find("select").val();
+        mapping[key] = value;
+      });
+
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mapping));
+      var dlAnchorElem = document.createElement('a');
+      dlAnchorElem.setAttribute("href", dataStr);
+      dlAnchorElem.setAttribute("download", "mapping.json");
+      dlAnchorElem.click();
+    }
+
+    function importMapping(event) {
+      var file = event.target.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var mapping = JSON.parse(e.target.result);
+          $("#mappingTableBody tr").each(function() {
+            var header = $(this).find("td:first").text();
+            if (mapping[header]) {
+              $(this).find("select").val(mapping[header]);
+            }
+          });
+        };
+        reader.readAsText(file);
+      }
+    }
+  </script>      
+</body>
+</html>
