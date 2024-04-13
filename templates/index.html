@@ -172,75 +172,81 @@
               </tbody>
             </table>
           </div>
+          <div id="formatToggle" class="mb-4">
+            <label for="saveAsCSV"><b>Save as CSV:</b></label>
+            <input type="checkbox" id="saveAsCSV" name="saveAsCSV">
+          </div>
           <button type="submit" class="btn btn-primary">Submit Mapping</button>
         </form>
       </div>
     {% endif %}
   </div>
   <script>
-    function updateMappingTable() {
-      var selectedFormat = $('#formatSelect').val();
-      var fileHeaders = {{ uploaded_file_headers|tojson }};
-      var fileFormats = {{ file_formats|tojson }};
-      
-      $('#mappingTableBody').empty();
-      
-      fileHeaders.forEach(function(header) {
-        var safeHeader = header.replace(/[\s\.]/g, '_');
-        var row = '<tr><td>' + header + '</td><td>';
-        row += '<select class="form-control" name="mapping_' + safeHeader + '">';
-        // Add an option for "No mapping"
-        row += '<option value="No mapping">No mapping</option>';
-        fileFormats[selectedFormat].forEach(function(field) {
-          row += '<option value="' + field + '">' + field + '</option>';
-        });
-        row += '</select></td></tr>';
-        $('#mappingTableBody').append(row);
-      });
-    }
-
-    $(document).on('change', '.custom-file-input', function() {
-      var fileName = $(this).val().split('\\').pop();
-      $(this).next('.custom-file-label').addClass("selected").html(fileName);
-    });
-
     $(document).ready(function() {
+      // Update the file input label when a file is chosen
+      $(document).on('change', '.custom-file-input', function() {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+      });
+
+      // Hide or show the CSV conversion option based on file type
+      var uploadedFileType = "{{ uploaded_file_type }}"; // Set by Flask in the rendered template
+      if (uploadedFileType === 'csv') {
+        $('#formatToggle').hide();
+      } else {
+        $('#formatToggle').show();
+      }
+
+      // Function to update the mapping table based on the selected format
+      function updateMappingTable() {
+        var selectedFormat = $('#formatSelect').val();
+        var fileHeaders = {{ uploaded_file_headers|tojson }};
+        var fileFormats = {{ file_formats|tojson }};
+        
+        $('#mappingTableBody').empty();
+        
+        fileHeaders.forEach(function(header) {
+          var safeHeader = header.replace(/[\s\.]/g, '_');
+          var row = '<tr><td>' + header + '</td><td>';
+          row += '<select class="form-control" name="mapping_' + safeHeader + '">';
+          // Add an option for "No mapping"
+          row += '<option value="No mapping">No mapping</option>';
+          fileFormats[selectedFormat].forEach(function(field) {
+            row += '<option value="' + field + '">' + field + '</option>';
+          });
+          row += '</select></td></tr>';
+          $('#mappingTableBody').append(row);
+        });
+      }
+
+      // Call updateMappingTable if the format selector exists
       if ($('#formatSelect').length) {
         updateMappingTable();
       }
-    });
 
-    function exportMapping() {
-      var mapping = {};
-      $("#mappingTableBody tr").each(function() {
-        var key = $(this).find("td:first").text();
-        var value = $(this).find("select").val();
-        mapping[key] = value;
+      // Attach the updateMappingTable function to the format selector's change event
+      $('#formatSelect').change(function() {
+        updateMappingTable();
       });
 
-      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mapping));
-      var dlAnchorElem = document.createElement('a');
-      dlAnchorElem.setAttribute("href", dataStr);
-      dlAnchorElem.setAttribute("download", "mapping.json");
-      dlAnchorElem.click();
-    }
+      // Function to export the current mappings
+      window.exportMapping = function() {
+        var mapping = {};
+        $("#mappingTableBody tr").each(function() {
+          var key = $(this).find("td:first").text().trim(); // Ensure to trim whitespace
+          var value = $(this).find("select").val();
+          mapping[key] = value;
+        });
 
-    function importMapping(event) {
-      var file = event.target.files[0];
-      if (file) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          var mapping = JSON.parse(e.target.result);
-          $("#mappingTableBody tr").each(function() {
-            var header = $(this).find("td:first").text();
-            if (mapping[header]) {
-              $(this).find("select").val(mapping[header]);
-            }
-          });
-        };
-        reader.readAsText(file);
-      }
-    }
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mapping));
+        var dlAnchorElem = document.createElement('a');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "mapping.json");
+        document.body.appendChild(dlAnchorElem); // Append to the body to ensure visibility
+        dlAnchorElem.click();
+        document.body.removeChild(dlAnchorElem); // Clean up after download
+      };
+    });
   </script>      
 </body>
 </html>
